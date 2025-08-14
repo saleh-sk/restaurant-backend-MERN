@@ -20,7 +20,7 @@ const ingredientSchema = new mongoose.Schema(
     },
     alertThreshold: {
       type: Number,
-      default: 0,
+      default: 20,
     },
   },
   {
