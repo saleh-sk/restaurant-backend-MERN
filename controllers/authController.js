@@ -10,9 +10,9 @@ const generateToken = (userId) => {
 
 
 const createUser = async (req, res) => {
-  const { name, DOB, phoneNumber, password, role } = req.body;
+  const { name, DOB, phoneNumber, password, role,salary,recievedPayments } = req.body;
 
-  if (!name || !phoneNumber || !password) {
+  if (!name || !phoneNumber || !password || !salary || !role) {
     return res.status(400).json({ message: 'Please enter all required fields' });
   }
 
@@ -28,6 +28,8 @@ const createUser = async (req, res) => {
       phoneNumber,
       password,
       role,
+      salary,
+      recievedPayments,
     });
 
     if (user) {
@@ -38,6 +40,8 @@ const createUser = async (req, res) => {
         role: user.role,
         token: generateToken(user._id),
         status:user.status,
+        salary:user.salary,
+        recievedPayments:user.recievedPayments,
       });
     } else {
       res.status(400).json({ message: 'Invalid Employee\'s data.' });
@@ -58,21 +62,33 @@ const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ phoneNumber });
 
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401).json({ message: 'Invalid phone number or password.' });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid phone number or password.' });
     }
+
+    if (!user.active) {
+      return res.status(403).json({ message: 'Login forbidden: Inactive account.' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid phone number or password.' });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 const getUsers = async (req, res) => {
   try {
@@ -110,7 +126,7 @@ const updateUser = async (req, res) => {
       new: true,
       runValidators: true
     });
-    if (!user|| !user.active) return res.status(404).json({ message: 'Employee not found or the Employee is not active any more.' });
+    if (!user) return res.status(404).json({ message: 'Employee not found.' });
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -25,19 +25,27 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin','accountant', 'cashier'],
+      enum: ['accountant', 'cashier'],
       default: 'cashier',
     },
     active: { 
       type: Boolean,
       default: true
     },
+    salary:{
+      type:Number,
+      required:true,
+    },
+    recievedPayments:{
+      type:Number,
+      required:false,
+      default:0,
+    }
   },
   {
     timestamps: true,
   }
 );
-
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {

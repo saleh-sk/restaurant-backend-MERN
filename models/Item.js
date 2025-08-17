@@ -28,17 +28,17 @@ const itemSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    cost:{
+    cost:{//2.5$
       type: Number,
       required: true,
     },
-    price: {
+    price: {//4.5$
       type: Number,
       required: true,
     },
     category: {
       type: String,
-      enum: ['plate', 'sandwich'],
+      enum: ['plate', 'sandwich','drink'],//replace with sadim's categories please
       required: true,
     },
     ingredients: [ingredientSchema],
